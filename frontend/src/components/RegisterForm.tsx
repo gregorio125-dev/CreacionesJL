@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../RegisterForm.css';
+import { registerUser as registerUserAPI } from '../services/api';
 
 const RegisterForm: React.FC = () => {
   const [firstName, setFirstName] = useState('');
@@ -21,7 +22,7 @@ const RegisterForm: React.FC = () => {
     return emailRegex.test(email);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     let newErrors = {
       email: '',
@@ -62,15 +63,17 @@ const RegisterForm: React.FC = () => {
     setErrors(newErrors);
 
     if (isValid) {
-      // Aquí iría la lógica para enviar los datos al backend
-      console.log('Datos del formulario válidos:', { firstName, lastName, email, password });
-      alert('Registro exitoso (validación de frontend).');
-      // Opcional: limpiar los campos del formulario después de un registro exitoso
-      setFirstName('');
-      setLastName('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
+      try {
+        await registerUserAPI(firstName, lastName, email, password);
+        setFirstName('');
+        setLastName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        window.location.href = '/login';
+      } catch (error) {
+        console.error('Error al registrar:', error);
+      }
     }
   };
 
@@ -138,7 +141,8 @@ const RegisterForm: React.FC = () => {
       <button type="submit">Registrarse</button>
     </form>
     <div className="register-form-footer">
-        <p><Link to="/">Regresar al inicio de sesión</Link></p>
+        <p><Link to="/login">Ya tienes cuenta? Inicia sesión</Link></p>
+        <p><Link to="/" className="back-link">← Regresar al inicio</Link></p>
       </div>
     </div>
   );
